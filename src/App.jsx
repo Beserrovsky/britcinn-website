@@ -6,45 +6,75 @@ import * as mqtt from 'mqtt/dist/mqtt.min';
 import { useState } from "react";
 import { useEffect } from "react";
 
+
+const host = 'ws://broker.emqx.io:8083/mqtt'
+// const host = 'ws://broker.hivemq.com:8080'
+const clientId = 'mqttjs_' + Math.random().toString(16).substring(2, 8)
+const options = {
+  keepalive: 60,
+  clientId: clientId,
+  protocolId: 'MQTT',
+  protocolVersion: 4,
+  clean: true,
+  reconnectPeriod: 1000,
+  connectTimeout: 30 * 1000,
+  will: {
+    topic: 'WillMsg',
+    payload: 'Connection Closed abnormally..!',
+    qos: 0,
+    retain: false
+  },
+}
 function App() {
 
   const [client, setClient] = useState(null);
-  const [connectStatus, setConnectStatus] = useState('Desconectado');
-  const [payload, setPayload] = useState(null);
+  const [connectionStatus, setConnecttionStatus] = useState('Desconectado');
+  const [messages, setMessages] = useState([]);
 
   const mqttConnect = (host) => {
-    setConnectStatus('Conectando...');
+    setConnecttionStatus('Conectando...');
     setClient(mqtt.connect(host));
   };
 
   useEffect(() => {
     if (client) {
       client.on('connect', () => {
-        setConnectStatus('Conectado');
+        setConnecttionStatus('Conectado');
+        client.subscribe('BRITCINN_db');
       });
       client.on('error', (err) => {
-        console.error('Connection error: ', err);
+        console.error('Erro de conexão: ', err);
         client.end();
       });
       client.on('reconnect', () => {
-        setConnectStatus('Reconnecting');
+        setConnecttionStatus('Reconectando...');
       });
       client.on('message', (topic, message) => {
-        const payload = { topic, message: message.toString() };
-        setPayload(payload);
+        if (message.toString()) {
+          let temp = messages;
+          temp.push({
+            topic,
+            message: JSON.parse(message.toString())
+          })
+          setMessages(temp);
+        }
       });
-
-      client.subscribe('britcinn-dht');
     }
-  }, [client]);
+  }, [client, setMessages]);
 
   useEffect(() => {
-    mqttConnect("wss://broker.hivemq.com:8000");
+    if (messages) {
+      console.log(messages);
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    mqttConnect(host, options);
   }, []);
   
   return (
     <Routes>
-      <Route path="/dashboard/*" element={<Dashboard connectStatus={connectStatus} payload={payload}/>} />
+      <Route path="/dashboard/*" element={<Dashboard connectionStatus={connectionStatus} messages={messages}/>} />
       <Route path="*" element={<Navigate to="/dashboard/home" replace/>} />
     </Routes>
   );

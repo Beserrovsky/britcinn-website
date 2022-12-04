@@ -11,12 +11,29 @@ import {
   statisticsCardsData,
   statisticsChartsData,
 } from "@/data";
+import { useState } from "react";
 
-export function Home() {
+export function Home({messages}) {
+
+  const default_data = {
+    mqtt: {
+      temp: 69,
+      hum: 69
+    }, 
+    api: {
+      avg_temp: 69, 
+      avg_hum: 69,
+      clients_online: 69,
+      exp_clients: 69
+    },  
+  }
+
+  const [statisticsData, setStatisticsData] = useState(statisticsCardsData(default_data));
+
   return (
     <div className="mt-12">
       <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
-        {statisticsCardsData.map(({ icon, title, footer, ...rest }) => (
+        {statisticsData.map(({ icon, title, footer, ...rest }) => (
           <StatisticsCard
             key={title}
             {...rest}

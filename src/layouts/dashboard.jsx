@@ -7,8 +7,9 @@ import {
 } from "@/widgets/layout";
 import routes from "@/routes";
 import { useMaterialTailwindController, setOpenConfigurator } from "@/context";
+import { cloneElement } from "react";
 
-export function Dashboard({connectStatus, payload}) {
+export function Dashboard({connectionStatus, messages}) {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavType } = controller;
 
@@ -21,14 +22,14 @@ export function Dashboard({connectStatus, payload}) {
         }
       />
       <div className="p-4 xl:ml-80">
-        <DashboardNavbar connectStatus={connectStatus} />
+        <DashboardNavbar connectionStatus={connectionStatus} />
         <Configurator />
         <Routes>
           {routes.map(
             ({ layout, pages }) =>
               layout === "dashboard" &&
               pages.map(({ path, element }) => (
-                <Route exact path={path} element={element} />
+                <Route exact path={path} element={cloneElement(element, { messages: messages })} />
               ))
           )}
         </Routes>
