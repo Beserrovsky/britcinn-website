@@ -12,28 +12,53 @@ import {
   statisticsChartsData,
 } from "@/data";
 import { useState } from "react";
+import { useEffect } from "react";
+
+const default_data = {
+  dht: {
+    temp: 70,
+    hum: 70
+  }, 
+  api: {
+    avg_temp: 69, 
+    avg_hum: 69,
+    clients_online: 1,
+    exp_clients: 69
+  },  
+}
+
+const MAX_MSG_QTD = 50;
 
 export function Home({messages}) {
 
-  const default_data = {
-    mqtt: {
-      temp: 69,
-      hum: 69
-    }, 
-    api: {
-      avg_temp: 69, 
-      avg_hum: 69,
-      clients_online: 69,
-      exp_clients: 69
-    },  
-  }
+  const [statisticsData, setStatisticsData] = useState(default_data);
+  
+  const [dhtData, setDhtData] = useState([]);
 
-  const [statisticsData, setStatisticsData] = useState(statisticsCardsData(default_data));
+  useEffect(() => {
+    function updateDht() {
+      if (messages && messages.length > 0){
+        let temp = dhtData;
+        console.log(messages[0].message.temp);
+        let length = temp.unshift(messages[0].message);
+        if (length > MAX_MSG_QTD) temp = temp.pop()
+        setDhtData(temp);
+      }
+    }
+    updateDht();
+  }, [messages]);
+
+  useEffect(() => {
+    let temp = statisticsData;
+    temp.dht = dhtData;
+    setStatisticsData(temp)
+  }, [statisticsData]);
 
   return (
     <div className="mt-12">
+      <h1>{JSON.stringify(messages)}</h1>
       <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
-        {statisticsData.map(({ icon, title, footer, ...rest }) => (
+        {statisticsCardsData(statisticsData).map(({ icon, title, footer, ...rest }) => (
           <StatisticsCard
             key={title}
             {...rest}

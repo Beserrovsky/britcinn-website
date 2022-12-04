@@ -5,8 +5,8 @@ import { IconAlien, IconDeviceDesktopAnalytics, IconDroplet, IconDropletFilled2,
 
 export const statisticsCardsData = (data) => {
   
-  let diff_temp = data.mqtt.temp - data.api.avg_temp;
-  let diff_hum = data.mqtt.hum - data.api.avg_hum;
+  let diff_temp = data.dht.temp - data.api.avg_temp;
+  let diff_hum = data.dht.hum - data.api.avg_hum;
   let diff_clients = data.api.exp_clients - data.api.clients_online;
 
   return  [
@@ -14,7 +14,7 @@ export const statisticsCardsData = (data) => {
     color: diff_temp == 0 ? "orange" : (diff_temp > 0 ? "red" : "blue"),
     icon: FireIcon,
     title: "Temperatura média",
-    value: `${data.mqtt.temp}°C`,
+    value: `${data.dht.temp}°C`,
     footer: {
       color: `text-${diff_temp > 0 ? "red" : "blue"}-500`,
       value: diff_temp != 0? `${Math.abs(diff_temp)}°C` : "",
@@ -25,7 +25,7 @@ export const statisticsCardsData = (data) => {
     color: diff_hum == 0 ? "gray" : (diff_hum > 0 ? "blue" : "brown"),
     icon: diff_hum == 0 ? IconDroplet : (diff_hum > 0 ? IconDropletFilled2 : IconDropletOff),
     title: "Umidade média",
-    value: `${data.mqtt.hum}%`,
+    value: `${data.dht.hum}%`,
     footer: {
       color: `text-${diff_hum > 0 ? "purple" : "brown"}-500`,
       value: diff_hum != 0? `${Math.abs(diff_hum)}%` : "",
