@@ -26,7 +26,7 @@ import {
   setOpenSidenav,
 } from "@/context";
 
-export function DashboardNavbar() {
+export function DashboardNavbar({connectStatus}) {
   const [controller, dispatch] = useMaterialTailwindController();
   const { fixedNavbar, openSidenav } = controller;
   const { pathname } = useLocation();
@@ -44,6 +44,11 @@ export function DashboardNavbar() {
       blurred={fixedNavbar}
     >
       <div className="flex flex-col-reverse justify-between gap-6 md:flex-row md:items-center">
+        <div className="text-base text-gray-500">Status da conexão: &nbsp;
+          {connectStatus == "Desconectado" && <span className="text-red-400">{connectStatus}</span>}
+          {connectStatus == "Conectando..." && <span className="text-orange-400">{connectStatus}</span>}
+          {connectStatus == "Conectado" && <span className="text-green-400">{connectStatus}</span>}
+        <div className=""></div></div>
         <div className="capitalize">
         </div>
         <div className="flex items-center">

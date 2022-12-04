@@ -8,7 +8,7 @@ import {
 import routes from "@/routes";
 import { useMaterialTailwindController, setOpenConfigurator } from "@/context";
 
-export function Dashboard() {
+export function Dashboard({connectStatus, payload}) {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavType } = controller;
 
@@ -21,7 +21,7 @@ export function Dashboard() {
         }
       />
       <div className="p-4 xl:ml-80">
-        <DashboardNavbar />
+        <DashboardNavbar connectStatus={connectStatus} />
         <Configurator />
         <Routes>
           {routes.map(
