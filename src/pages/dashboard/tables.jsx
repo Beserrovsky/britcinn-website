@@ -7,8 +7,32 @@ import {
   Chip,
 } from "@material-tailwind/react";
 import { brittTableData } from "@/data";
+import { useState } from "react";
+import { useEffect } from "react";
 
-export function Tables() {
+import { IconBulb, IconBulbOff, IconLockOpen, IconLock, IconBed } from "@tabler/icons";
+
+
+export function Tables({lightState, servoAngle}) {
+
+  const toggleLight = () => {
+
+  }
+
+  const toggleLock = () => {
+    
+  }
+
+  const getLightColor = (item) => {
+    if (item == null) { return 'bg-blue-gray-100';} 
+    return item.light_state? 'bg-orange-500' : 'bg-blue-gray-100';
+  }
+
+  const getLockColor = (item) => {
+    if (item == null) { return 'bg-blue-gray-100';} 
+    return item.light_state? 'bg-blue-gray-300' : 'bg-blue-gray-300';
+  }
+
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       <Card>
@@ -24,92 +48,37 @@ export function Tables() {
               className="h-full w-full object-cover"
             />
 
-          <table className="w-full min-w-[640px] table-auto">
-            <thead>
-              <tr>
-                {["author", "function", "status", "employed", ""].map((el) => (
-                  <th
-                    key={el}
-                    className="border-b border-blue-gray-50 py-3 px-5 text-left"
-                  >
-                    <Typography
-                      variant="small"
-                      className="text-[11px] font-bold uppercase text-blue-gray-400"
-                    >
-                      {el}
-                    </Typography>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {/* {authorsTableData.map(
-                ({ img, name, email, job, online, date }, key) => {
-                  const className = `py-3 px-5 ${
-                    key === authorsTableData.length - 1
-                      ? ""
-                      : "border-b border-blue-gray-50"
-                  }`;
+            <div className={`${getLightColor(lightState)} w-1/100 h-1/100 hidden lg:block absolute rounded-lg p-3 cursor-pointer`}
+              style={{'top': '61%', 'left': '14%'}}
+              onClick={()=>toggleLight}
+            >
+              {lightState != null && <Bulb state={lightState.light_state} />}
+            </div>
+          
+            <div className={`${getLockColor(servoAngle)} w-1/100 h-1/100 hidden lg:block absolute rounded-lg p-3 cursor-pointer`}
+              style={{'top': '52%', 'left': '22%'}}
+              onClick={()=>toggleLock}>
+              {servoAngle != null && <Lock state={servoAngle.servo_angle == 0} />}
+            </div>
 
-                  return (
-                    <tr key={name}>
-                      <td className={className}>
-                        <div className="flex items-center gap-4">
-                          <Avatar src={img} alt={name} size="sm" />
-                          <div>
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-semibold"
-                            >
-                              {name}
-                            </Typography>
-                            <Typography className="text-xs font-normal text-blue-gray-500">
-                              {email}
-                            </Typography>
-                          </div>
-                        </div>
-                      </td>
-                      <td className={className}>
-                        <Typography className="text-xs font-semibold text-blue-gray-600">
-                          {job[0]}
-                        </Typography>
-                        <Typography className="text-xs font-normal text-blue-gray-500">
-                          {job[1]}
-                        </Typography>
-                      </td>
-                      <td className={className}>
-                        <Chip
-                          variant="gradient"
-                          color={online ? "green" : "blue-gray"}
-                          value={online ? "online" : "offline"}
-                          className="py-0.5 px-2 text-[11px] font-medium"
-                        />
-                      </td>
-                      <td className={className}>
-                        <Typography className="text-xs font-semibold text-blue-gray-600">
-                          {date}
-                        </Typography>
-                      </td>
-                      <td className={className}>
-                        <Typography
-                          as="a"
-                          href="#"
-                          className="text-xs font-semibold text-blue-gray-600"
-                        >
-                          Edit
-                        </Typography>
-                      </td>
-                    </tr>
-                  );
-                }
-              )} */}
-            </tbody>
-          </table>
+            <div className="bg-deep-orange-200 w-1/100 h-1/100 lg:hidden absolute rounded-lg p-1"
+              style={{'top': '65%', 'left': '11%'}}>
+              <IconBed/>
+            </div>
+            
         </CardBody>
       </Card>
     </div>
   );
 }
+
+const Bulb = ({state}) => {
+  return state? <IconBulb/> : <IconBulbOff/>
+}
+
+const Lock = ({state}) => {
+  return state? <IconLockOpen/> : <IconLock/>
+}
+
 
 export default Tables;

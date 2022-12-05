@@ -16,47 +16,58 @@ import { useEffect } from "react";
 
 const default_data = {
   dht: {
-    temp: 70,
-    hum: 70
+    temp: 0,
+    hum: 0
   }, 
   api: {
-    avg_temp: 69, 
-    avg_hum: 69,
+    avg_temp: 24, 
+    avg_hum: 55,
     clients_online: 1,
-    exp_clients: 69
+    exp_clients: 1
   },  
 }
 
-const MAX_MSG_QTD = 50;
+const MAX_DHT_QTD = 50;
 
-export function Home({messages}) {
+export function Home({message, messages}) {
 
   const [statisticsData, setStatisticsData] = useState(default_data);
+  const [lastDht, setLastDht] = useState([]);
   
-  const [dhtData, setDhtData] = useState([]);
-
   useEffect(() => {
-    function updateDht() {
-      if (messages && messages.length > 0){
-        let temp = dhtData;
-        console.log(messages[0].message.temp);
-        let length = temp.unshift(messages[0].message);
-        if (length > MAX_MSG_QTD) temp = temp.pop()
-        setDhtData(temp);
+    if (message) {
+      const updateDht = () => {        
+        if (message.topic == 'britcinn/dht') {
+          let dhttemp = lastDht;
+          let length = dhttemp.unshift(message.message);
+          if (length > MAX_DHT_QTD) dhttemp.pop();
+          setLastDht(dhttemp);
+
+          if(lastDht.length != 0) {
+            let temp = statisticsData;
+
+            let sum_temperatures = 0, sum_humidity = 0;
+            for (let index = 0; index < lastDht.length; index++) {
+              sum_temperatures += lastDht[index].temp;
+              sum_humidity += lastDht[index].hum;
+            }
+
+            temp.dht = {
+              temp: Math.floor(sum_temperatures / lastDht.length),
+              hum: Math.floor(sum_humidity / lastDht.length)
+            }
+
+            setStatisticsData(temp);
+          }
+        }
+
       }
+      updateDht();
     }
-    updateDht();
-  }, [messages]);
-
-  useEffect(() => {
-    let temp = statisticsData;
-    temp.dht = dhtData;
-    setStatisticsData(temp)
-  }, [statisticsData]);
+  }, [message]);
 
   return (
     <div className="mt-12">
-      <h1>{JSON.stringify(messages)}</h1>
       <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
         {statisticsCardsData(statisticsData).map(({ icon, title, footer, ...rest }) => (
           <StatisticsCard

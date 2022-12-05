@@ -41,7 +41,13 @@ export function Dashboard() {
 
   const [client, setClient] = useState(null);
   const [connectionStatus, setConnecttionStatus] = useState('Desconectado');
+  const [clientSetted, setClientSetted] = useState(false);
+
+  const [message, setMessage] = useState();
   const [messages, setMessages] = useState([]);
+  const [lightState, setLightState] = useState(null);
+  const [servoAngle, setServoAngle] = useState(null);
+  
 
   const mqttConnect = (host) => {
     setConnecttionStatus('Conectando...');
@@ -49,34 +55,58 @@ export function Dashboard() {
   };
 
   useEffect(() => {
-    if (client) {
-      client.on('connect', () => {
-        setConnecttionStatus('Conectado');
-        client.subscribe('britcinn/dht');
-      });
-      client.on('error', (err) => {
-        console.error('Erro de conexão: ', err);
-        client.end();
-      });
-      client.on('reconnect', () => {
-        setConnecttionStatus('Reconectando...');
-      });
+    if (client && !clientSetted) {
+      function settupClient() {
+        client.on('connect', () => {
+          setConnecttionStatus('Conectado');
+          client.subscribe('britcinn/#');
+        });
+        client.on('error', (err) => {
+          console.error('Erro de conexão: ', err);
+          client.end();
+        });
+        client.on('reconnect', () => {
+          setConnecttionStatus('Reconectando...');
+        });
 
-      client.on('message', (topic, message) => {
-        if (message.toString()) {
-          let temp = messages;
-          let length = temp.unshift({
-            topic,
-            message: JSON.parse(message.toString())
-          })
-          if (length > MAX_MSG_QTD) temp.pop();
-          // console.log(temp);
-          setMessages(temp);
-        }
-      });
+        client.on('message', (topic, message) => {
+          if (message.toString()) {
+            let msg = {
+              topic,
+              message: JSON.parse(message.toString())
+            };
 
+            switch(msg.topic) {
+              case 'britcinn/servo_angle':
+                setServoAngle(msg.message);
+                break;
+              case 'britcinn/light_state':
+                setLightState(msg.message);
+                break;
+            }
+
+            setMessage(msg);
+          }
+        });
+
+        setClientSetted(true);
+      }
+
+      settupClient();
     }
-  }, [client]);
+  }, [client, clientSetted]);
+
+  useEffect(() => {
+    if (message) {
+      function updateArray() {
+        let temp = messages;
+        let length = messages.unshift(message);
+        if (length > MAX_MSG_QTD) temp.pop();
+        setMessages(temp);
+      }
+      updateArray();
+    }
+  }, [message]);
 
   useEffect(() => {
     mqttConnect(host, options);
@@ -84,7 +114,6 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-blue-gray-50/50">
-      <h1>{messages.length}</h1>
       <Sidenav
         routes={routes}
         brandImg={
@@ -99,7 +128,12 @@ export function Dashboard() {
             ({ layout, pages }) =>
               layout === "dashboard" &&
               pages.map(({ path, element }) => (
-                <Route exact path={path} element={cloneElement(element, { messages: messages })} />
+                <Route exact path={path} element={cloneElement(element, { 
+                  message: message, 
+                  messages: messages, 
+                  lightState: lightState, 
+                  servoAngle: servoAngle})
+                } />
               ))
           )}
         </Routes>

@@ -1,6 +1,7 @@
 import {
   FireIcon
 } from "@heroicons/react/24/solid";
+
 import { IconAlien, IconDeviceDesktopAnalytics, IconDroplet, IconDropletFilled2, IconDropletOff } from "@tabler/icons";
 
 export const statisticsCardsData = (data) => {
@@ -18,7 +19,7 @@ export const statisticsCardsData = (data) => {
     footer: {
       color: `text-${diff_temp > 0 ? "red" : "blue"}-500`,
       value: diff_temp != 0? `${Math.abs(diff_temp)}°C` : "",
-      label: diff_temp == 0 ? "Bem na média histórica!" : (diff_temp > 0? "a mais que o padrão" : "a menos que o padrão"),
+      label: diff_temp == 0 ? "Temperatura perfeita!" : (diff_temp > 0? "a mais que o ideal" : "a menos que o ideal"),
     },
   },
   {
@@ -29,7 +30,7 @@ export const statisticsCardsData = (data) => {
     footer: {
       color: `text-${diff_hum > 0 ? "purple" : "brown"}-500`,
       value: diff_hum != 0? `${Math.abs(diff_hum)}%` : "",
-      label: diff_hum == 0 ? "Bem na média histórica!" : (diff_hum > 0? "a mais que o padrão" : "a menos que o padrão"),
+      label: diff_hum == 0 ? "Umidade perfeita!" : (diff_hum > 0? "a mais que o ideal" : "a menos que o ideal"),
     },
   },
   {
@@ -49,7 +50,7 @@ export const statisticsCardsData = (data) => {
     title: "Alien",
     value: `${Math.floor(Math.random() * 100)} Aliens`,
     footer: {
-      label: "Isso não significa nada!",
+      label: "Indica atualização!",
     },
   },
 ]};
