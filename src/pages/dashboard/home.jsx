@@ -9,10 +9,14 @@ import { StatisticsCard } from "@/widgets/cards";
 import { StatisticsChart } from "@/widgets/charts";
 import {
   statisticsCardsData,
-  statisticsChartsData,
+  lineChart,
 } from "@/data";
 import { useState } from "react";
 import { useEffect } from "react";
+
+import britcinn_svg from '../../assets/britcinn.svg';
+
+const MAX_DHT_QTD = 10;
 
 const default_data = {
   dht: {
@@ -27,21 +31,60 @@ const default_data = {
   },  
 }
 
-const MAX_DHT_QTD = 50;
+const default_charts_data = [
+  {
+    color: "pink",
+    title: "Temperatura",
+    description: "Histórico de temperatura",
+    footer: `Max. ${MAX_DHT_QTD} registros`,
+    chart: lineChart("Temperatura", []),
+  },
+  {
+    color: "blue",
+    title: "Umidade",
+    description: "Histórico de umidade",
+    footer: `Max. ${MAX_DHT_QTD} registros`,
+    chart: lineChart("Umidade", []),
+  }
+];  
 
 export function Home({message, messages}) {
 
   const [statisticsData, setStatisticsData] = useState(default_data);
   const [lastDht, setLastDht] = useState([]);
+  const [lastTemp, setLastTemp] = useState([]);
+  const [lastHum, setLastHum] = useState([]);
+  const [latestDht, setLatestDht] = useState(null);
   
+  const [statisticsChartsData, setStatisticsChartsData] = useState(default_charts_data);
+
+  useEffect(() => {
+    let chart_data = statisticsChartsData;
+    chart_data[0].chart = lineChart("Temperatura", lastTemp);
+    chart_data[1].chart = lineChart("Umidade", lastHum);
+    setStatisticsChartsData(chart_data);
+  }, [latestDht]);
+
   useEffect(() => {
     if (message) {
       const updateDht = () => {        
         if (message.topic == 'britcinn/dht') {
-          let dhttemp = lastDht;
-          let length = dhttemp.unshift(message.message);
-          if (length > MAX_DHT_QTD) dhttemp.pop();
-          setLastDht(dhttemp);
+          let temp = lastDht;
+          let length = temp.unshift(message.message);
+          if (length > MAX_DHT_QTD) temp.pop();
+          setLastDht(temp);
+
+          temp = lastTemp;
+          length = temp.push(message.message.temp);
+          if (length > MAX_DHT_QTD) temp.shift();
+          setLastTemp(temp);
+
+          temp = lastHum;
+          length = temp.push(message.message.hum);
+          if (length > MAX_DHT_QTD) temp.shift();
+          setLastHum(temp);
+
+          setLatestDht(message.message);
 
           if(lastDht.length != 0) {
             let temp = statisticsData;
@@ -102,6 +145,10 @@ export function Home({message, messages}) {
             }
           />
         ))}
+        <img src={britcinn_svg} alt="" />
+      </div>
+      <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
+        
       </div>
     </div>
   );
