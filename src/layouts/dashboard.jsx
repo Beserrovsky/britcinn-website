@@ -112,6 +112,10 @@ export function Dashboard() {
     mqttConnect(host, options);
   }, []);
 
+  const publish = (topic, message) => {
+    client.publish('britcinn/' + topic, message);
+  }
+
   return (
     <div className="min-h-screen bg-blue-gray-50/50">
       <Sidenav
@@ -129,6 +133,7 @@ export function Dashboard() {
               layout === "dashboard" &&
               pages.map(({ path, element }) => (
                 <Route exact path={path} element={cloneElement(element, { 
+                  publish: publish,
                   message: message, 
                   messages: messages, 
                   lightState: lightState, 

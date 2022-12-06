@@ -13,24 +13,55 @@ import { useEffect } from "react";
 import { IconBulb, IconBulbOff, IconLockOpen, IconLock, IconBed } from "@tabler/icons";
 
 
-export function Tables({lightState, servoAngle}) {
+export function Tables({publish, lightState, servoAngle}) {
+
+  const [waiting, setWaiting] = useState(false);
+  const [lastLightState, setLastLightState] = useState(null);
+  const [lastServoAngle, setLastServoAngle] = useState(null);
+
 
   const toggleLight = () => {
-
+    setWaiting(true);
+    publish('light', JSON.stringify({
+      light : !lightState.light_state
+    }));
+    setLastLightState(lightState.light_state);
   }
 
   const toggleLock = () => {
-    
+    setWaiting(true);
+    publish('servo', JSON.stringify({
+      angle : (servoAngle.servo_angle == 0? 90 : 0)
+    }));
+    setLastServoAngle(servoAngle.servo_angle);
   }
 
-  const getLightColor = (item) => {
-    if (item == null) { return 'bg-blue-gray-100';} 
-    return item.light_state? 'bg-orange-500' : 'bg-blue-gray-100';
+  useEffect(() => {
+    const updateWaiting = () => {
+      if (lightState != lastLightState || servoAngle != lastServoAngle) {
+        setWaiting(false);
+      }
+    }
+    updateWaiting();
+  }, [lightState, servoAngle]);
+
+  const getLightStyle = (item, waiting) => {
+    if (item == null) { return 'bg-blue-gray-100 cursor-default'; }
+
+    return item.light_state? 
+      `bg-orange-500 cursor-${waiting? 'wait':'pointer'}` 
+      : 
+      `bg-blue-300 cursor-${waiting? 'wait':'pointer'}`;
   }
 
-  const getLockColor = (item) => {
-    if (item == null) { return 'bg-blue-gray-100';} 
-    return item.light_state? 'bg-blue-gray-300' : 'bg-blue-gray-300';
+  const getLockStyle = (item, waiting) => {
+    if (item == null) { return 'bg-blue-gray-100 cursor-default'; }
+
+    return item.servo_angle == 90? 
+      `bg-orange-500 cursor-${waiting? 'wait':'pointer'}`  
+      :
+      `bg-blue-300 cursor-${waiting? 'wait':'pointer'}`
+      
   }
 
   return (
@@ -48,17 +79,17 @@ export function Tables({lightState, servoAngle}) {
               className="h-full w-full object-cover"
             />
 
-            <div className={`${getLightColor(lightState)} w-1/100 h-1/100 hidden lg:block absolute rounded-lg p-3 cursor-pointer`}
+            <div className={`${getLightStyle(lightState, waiting)} w-1/100 h-1/100 hidden lg:block absolute rounded-lg p-3`}
               style={{'top': '61%', 'left': '14%'}}
-              onClick={()=>toggleLight}
+              onClick={()=>{if(!waiting) { toggleLight() } }}
             >
               {lightState != null && <Bulb state={lightState.light_state} />}
             </div>
           
-            <div className={`${getLockColor(servoAngle)} w-1/100 h-1/100 hidden lg:block absolute rounded-lg p-3 cursor-pointer`}
+            <div className={`${getLockStyle(servoAngle, waiting)} w-1/100 h-1/100 hidden lg:block absolute rounded-lg p-3`}
               style={{'top': '52%', 'left': '22%'}}
-              onClick={()=>toggleLock}>
-              {servoAngle != null && <Lock state={servoAngle.servo_angle == 0} />}
+              onClick={()=>{if(!waiting) { toggleLock() } }}>
+              {servoAngle != null && <Lock state={servoAngle.servo_angle == 90} />}
             </div>
 
             <div className="bg-deep-orange-200 w-1/100 h-1/100 lg:hidden absolute rounded-lg p-1"
@@ -77,7 +108,7 @@ const Bulb = ({state}) => {
 }
 
 const Lock = ({state}) => {
-  return state? <IconLockOpen/> : <IconLock/>
+  return state? <IconLock/> : <IconLockOpen/>
 }
 
 
